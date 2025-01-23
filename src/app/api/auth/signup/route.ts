@@ -23,6 +23,7 @@ export async function POST(req: Request) {
   });
 
   return NextResponse.json({
+    success: true, // Add this property
     id: newUser.id,
     email: newUser.email,
     name: newUser.name,

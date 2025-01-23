@@ -1,3 +1,4 @@
+import { getUserIdFromToken } from "@/lib/auth";
 import React, { useState } from "react";
 
 const TransactionForm = () => {
@@ -42,6 +43,19 @@ const TransactionForm = () => {
     }
 
     try {
+      // Retrieve the token from localStorage
+      const token = localStorage.getItem("token");
+
+      // Get the user ID based on the token (you may need to decode or fetch the user details)
+      const userId = token ? getUserIdFromToken(token) : null; // Implement getUserIdFromToken function
+      console.log("userId", userId);
+
+      if (!userId) {
+        setError("User not authenticated.");
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch("/api/transactions", {
         method: "POST",
         headers: {
@@ -53,6 +67,7 @@ const TransactionForm = () => {
           date: formData.date,
           description: formData.description,
           type: formData.type.toUpperCase(), // Match the enum in Prisma
+          userId: userId, // Send userId along with the transaction
         }),
       });
 

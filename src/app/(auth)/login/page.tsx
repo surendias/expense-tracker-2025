@@ -1,11 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useAuth } from "@/context/AuthContext"; // Import the AuthContext
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const router = useRouter(); // Use the Next.js router for navigation
+  const { login } = useAuth(); // Use the login function from the AuthContext
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +26,8 @@ export default function Login() {
       const data = await res.json();
 
       if (data.token) {
-        localStorage.setItem("token", data.token);
+        login(data.token); // Use login from context instead of localStorage
+        router.push("/"); // Redirect to the home page
       } else {
         setError(data.error || "Login failed");
       }
@@ -72,6 +78,14 @@ export default function Login() {
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               required
             />
+            <div className="mt-2 text-right">
+              <Link
+                href="/forgot-password"
+                className="text-sm text-blue-600 hover:underline"
+              >
+                Forgot Password?
+              </Link>
+            </div>
           </div>
           <div>
             <button
@@ -85,6 +99,17 @@ export default function Login() {
             >
               {loading ? "Logging in..." : "Login"}
             </button>
+          </div>
+          <div className="mt-4 text-center">
+            <p className="text-sm text-gray-700">
+              Don’t have an account?{" "}
+              <Link
+                href="/signup"
+                className="text-blue-600 hover:underline font-medium"
+              >
+                Sign Up
+              </Link>
+            </p>
           </div>
         </form>
       </div>

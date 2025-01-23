@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 export default function Signup() {
   const [form, setForm] = useState({ email: "", password: "", name: "" });
@@ -107,6 +108,17 @@ export default function Signup() {
             >
               {loading ? "Signing up..." : "Sign Up"}
             </button>
+          </div>
+          <div className="mt-4 text-center">
+            <p className="text-sm text-gray-700">
+              Already have an account?{" "}
+              <Link
+                href="/login"
+                className="text-blue-600 hover:underline font-medium"
+              >
+                Go to Login
+              </Link>
+            </p>
           </div>
         </form>
       </div>

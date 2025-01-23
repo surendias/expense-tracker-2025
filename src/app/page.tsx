@@ -1,5 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -24,6 +26,22 @@ ChartJS.register(
 export default function Home() {
   const [activeTab, setActiveTab] = useState("form");
   const [timePeriod, setTimePeriod] = useState("monthly");
+  const { isAuthenticated, setAuthenticated, logout } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/login");
+    } else {
+      setAuthenticated(true);
+    }
+  }, [router, setAuthenticated]);
+
+  const handleSignOut = () => {
+    localStorage.removeItem("token"); // Remove token from storage
+    router.push("/login"); // Redirect to login page
+  };
 
   const transactions = [
     {
@@ -76,8 +94,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-3xl">
-        <div className="mb-6 border-b border-gray-200">
-          <nav className="-mb-px flex space-x-4">
+        <div className="mb-6 border-b border-gray-200 flex justify-between">
+          <nav className="flex space-x-4">
             <button
               onClick={() => setActiveTab("form")}
               className={`px-4 py-2 text-sm font-medium ${
@@ -109,6 +127,12 @@ export default function Home() {
               Summary Graph
             </button>
           </nav>
+          <button
+            onClick={handleSignOut}
+            className="px-4 py-2 text-red-500 text-sm font-medium  hover:bg-red-600 rounded-md hover:text-white focus:ring-2 focus:ring-red-400 focus:ring-offset-2"
+          >
+            Sign Out
+          </button>
         </div>
 
         {activeTab === "form" && (
