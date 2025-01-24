@@ -116,7 +116,11 @@ const TransactionForm = () => {
         body: JSON.stringify({
           // Convert the object to JSON string
           amount: parseFloat(formData.amount),
-          category: formData.category,
+          category: {
+            connect: {
+              id: formData.category, // Backend expects this nested format
+            },
+          },
           date: formData.date,
           description: formData.description,
           type: formData.type.toUpperCase(),
