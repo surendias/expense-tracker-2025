@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
 export async function GET() {
   const transactions = await prisma.transaction.findMany({
@@ -9,26 +10,63 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const data = await req.json();
+  try {
+    const data = await req.json();
 
-  // Check if userId is provided in the request
-  if (!data.userId) {
-    return NextResponse.json({ error: "User ID is required" }, { status: 400 });
-  }
+    console.log({ data });
 
-  // Create a new transaction and associate it with the user
-  const newTransaction = await prisma.transaction.create({
-    data: {
-      amount: data.amount,
-      category: data.category,
-      date: data.date,
-      description: data.description,
-      type: data.type,
-      user: {
-        connect: { id: data.userId }, // Associate the user with the transaction
+    if (!data) {
+      return NextResponse.json(
+        { error: "Payload cannot be null" },
+        { status: 400 }
+      );
+    }
+
+    const { amount, category, date, description, type, userId } = data;
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: "User ID is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!amount || !category || !date || !description || !type) {
+      return NextResponse.json(
+        { error: "All fields are required" },
+        { status: 400 }
+      );
+    }
+
+    const newTransaction = await prisma.transaction.create({
+      data: {
+        amount,
+        category,
+        date,
+        description,
+        type,
+        user: {
+          connect: { id: userId },
+        },
       },
-    },
-  });
+    });
 
-  return NextResponse.json(newTransaction);
+    return NextResponse.json(newTransaction);
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError) {
+      console.error("Prisma error:", err.message);
+    } else if (err) {
+      console.error(
+        "Unexpected error:",
+        err instanceof Error ? err.message : err
+      );
+    } else {
+      console.error("Unexpected error occurred, no error object available.");
+    }
+
+    return NextResponse.json(
+      { error: "An error occurred while creating the transaction" },
+      { status: 500 }
+    );
+  }
 }

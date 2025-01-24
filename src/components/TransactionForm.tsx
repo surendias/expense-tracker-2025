@@ -1,20 +1,66 @@
 import { getUserIdFromToken } from "@/lib/auth";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
+import { useRouter } from "next/navigation"; // Use `useRouter` for navigation
 
 const TransactionForm = () => {
+  const router = useRouter();
+
+  // Function to validate token
+  const validateToken = () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      return false;
+    }
+
+    try {
+      const decoded: any = jwtDecode(token);
+      const currentTime = Date.now() / 1000; // Convert to seconds
+      return decoded.exp > currentTime; // Token is valid if expiration time is in the future
+    } catch (error) {
+      return false;
+    }
+  };
+
   const [formData, setFormData] = useState({
     amount: "",
-    category: "",
+    category: 0,
     date: "",
     description: "",
-    type: "Income", // Default value
+    type: "Expense", // Default value
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [categories, setCategories] = useState<{ id: number; name: string }[]>(
+    []
+  );
+
+  // Fetch categories from the database
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch("/api/categories"); // Adjust the API endpoint as needed
+        if (!response.ok) {
+          throw new Error("Failed to fetch categories.");
+        }
+        const data = await response.json();
+        console.log(data);
+        setCategories(data); // Assuming API returns { categories: [] }
+      } catch (err) {
+        console.error(err);
+        setError("Unable to load categories. Please try again later.");
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
@@ -45,6 +91,12 @@ const TransactionForm = () => {
     try {
       // Retrieve the token from localStorage
       const token = localStorage.getItem("token");
+      console.log("token", token);
+
+      if (!validateToken() || !token) {
+        router.push("/login"); // Redirect to login page
+        return;
+      }
 
       // Get the user ID based on the token (you may need to decode or fetch the user details)
       const userId = token ? getUserIdFromToken(token) : null; // Implement getUserIdFromToken function
@@ -59,15 +111,16 @@ const TransactionForm = () => {
       const response = await fetch("/api/transactions", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json", // Inform the server you're sending JSON
         },
         body: JSON.stringify({
+          // Convert the object to JSON string
           amount: parseFloat(formData.amount),
           category: formData.category,
           date: formData.date,
           description: formData.description,
-          type: formData.type.toUpperCase(), // Match the enum in Prisma
-          userId: userId, // Send userId along with the transaction
+          type: formData.type.toUpperCase(),
+          userId: userId,
         }),
       });
 
@@ -78,7 +131,7 @@ const TransactionForm = () => {
       setSuccess("Transaction saved successfully!");
       setFormData({
         amount: "",
-        category: "",
+        category: 0,
         date: "",
         description: "",
         type: "Income",
@@ -122,14 +175,21 @@ const TransactionForm = () => {
         >
           Category
         </label>
-        <input
-          type="text"
+        <select
           id="category"
           value={formData.category}
           onChange={handleInputChange}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-          placeholder="Enter category"
-        />
+        >
+          <option value="" disabled>
+            Select a category
+          </option>
+          {categories?.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </select>
       </div>
       <div>
         <label
@@ -170,23 +230,6 @@ const TransactionForm = () => {
           <div className="mt-2 space-y-2">
             <div className="flex items-center">
               <input
-                id="type-income"
-                name="type"
-                type="radio"
-                value="Income"
-                checked={formData.type === "Income"}
-                onChange={handleTypeChange}
-                className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <label
-                htmlFor="type-income"
-                className="ml-3 block text-sm font-medium text-gray-700"
-              >
-                Income
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
                 id="type-expense"
                 name="type"
                 type="radio"
@@ -200,6 +243,23 @@ const TransactionForm = () => {
                 className="ml-3 block text-sm font-medium text-gray-700"
               >
                 Expense
+              </label>
+            </div>
+            <div className="flex items-center">
+              <input
+                id="type-income"
+                name="type"
+                type="radio"
+                value="Income"
+                checked={formData.type === "Income"}
+                onChange={handleTypeChange}
+                className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <label
+                htmlFor="type-income"
+                className="ml-3 block text-sm font-medium text-gray-700"
+              >
+                Income
               </label>
             </div>
           </div>
