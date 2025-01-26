@@ -10,17 +10,23 @@ const isValidTransactionType = (type: string): type is TransactionType => {
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
 
+  console.log({ searchParams });
+
   // Extract query parameters
   const category = searchParams.get("category") || undefined;
   const type = searchParams.get("type") || undefined;
   const page = parseInt(searchParams.get("page") || "1", 10);
   const pageSize = parseInt(searchParams.get("pageSize") || "10", 10);
 
+  console.log({ category, type, page, pageSize });
+
   // Validate the `type` parameter
   const validType =
     type && isValidTransactionType(type)
       ? (type as TransactionType)
       : undefined;
+
+  console.log({ validType });
 
   // Calculate pagination offset
   const skip = (page - 1) * pageSize;

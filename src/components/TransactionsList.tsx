@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import CategoryDropdown from "./CategoryDropdown";
 
 interface Transaction {
   id: number;
@@ -13,7 +14,7 @@ const TransactionsList: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [filterCategory, setFilterCategory] = useState("");
+  const [filterCategory, setFilterCategory] = useState<string>(""); // Use string for category filter
   const [filterType, setFilterType] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -25,9 +26,8 @@ const TransactionsList: React.FC = () => {
     setError("");
 
     try {
-      // Ensure the `type` parameter is valid or undefined
       const url = `/api/transactions?category=${filterCategory}&type=${
-        filterType === "Income" || filterType === "Expense" ? filterType : ""
+        filterType === "INCOME" || filterType === "EXPENSE" ? filterType : ""
       }&page=${page}&pageSize=${pageSize}`;
       const response = await fetch(url);
       if (!response.ok) {
@@ -51,13 +51,6 @@ const TransactionsList: React.FC = () => {
   useEffect(() => {
     fetchTransactions();
   }, [filterCategory, filterType, page, pageSize]);
-
-  const handleFilterCategoryChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setFilterCategory(e.target.value);
-    setPage(1); // Reset to the first page when filters change
-  };
 
   const handleFilterTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setFilterType(e.target.value);
@@ -90,13 +83,9 @@ const TransactionsList: React.FC = () => {
             >
               Category
             </label>
-            <input
-              type="text"
-              id="filterCategory"
+            <CategoryDropdown
               value={filterCategory}
-              onChange={handleFilterCategoryChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              placeholder="Filter by category"
+              onChange={(value) => setFilterCategory(value.toString())}
             />
           </div>
           <div>
@@ -113,8 +102,8 @@ const TransactionsList: React.FC = () => {
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             >
               <option value="">All</option>
-              <option value="Income">Income</option>
-              <option value="Expense">Expense</option>
+              <option value="INCOME">Income</option>
+              <option value="EXPENSE">Expense</option>
             </select>
           </div>
         </div>

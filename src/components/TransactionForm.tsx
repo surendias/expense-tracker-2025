@@ -42,7 +42,8 @@ const TransactionForm = () => {
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleCategoryChange = (categoryId: number) => {
+  const handleCategoryChange = (value: string | number) => {
+    const categoryId = typeof value === "string" ? parseInt(value, 10) : value;
     setFormData((prev) => ({ ...prev, category: categoryId }));
   };
 

@@ -6,8 +6,8 @@ interface Category {
 }
 
 interface CategoryDropdownProps {
-  value: number;
-  onChange: (categoryId: number) => void;
+  value: number | string; // Accepts both number (for form) and string (for filter)
+  onChange: (value: number | string) => void; // Handles both number and string
 }
 
 const CategoryDropdown: React.FC<CategoryDropdownProps> = ({
@@ -18,7 +18,7 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Fetch categories from the database
+  // Fetch categories from the API
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -29,8 +29,11 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({
         const data = await response.json();
         setCategories(data);
       } catch (err) {
-        console.error(err);
-        setError("Unable to load categories. Please try again later.");
+        setError(
+          err instanceof Error
+            ? err.message
+            : "An error occurred while fetching categories."
+        );
       } finally {
         setLoading(false);
       }
@@ -40,8 +43,8 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedCategoryId = parseInt(e.target.value, 10);
-    onChange(selectedCategoryId);
+    const selectedValue = e.target.value;
+    onChange(selectedValue); // Pass the selected value to the parent component
   };
 
   if (loading) {
@@ -59,9 +62,7 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({
       onChange={handleChange}
       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
     >
-      <option value="0" disabled>
-        Select a category
-      </option>
+      <option value="">Select a category</option>
       {categories.map((category) => (
         <option key={category.id} value={category.id}>
           {category.name}
