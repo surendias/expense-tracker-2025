@@ -1,7 +1,8 @@
 import { getUserIdFromToken } from "@/lib/auth";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { jwtDecode } from "jwt-decode";
-import { useRouter } from "next/navigation"; // Use `useRouter` for navigation
+import { useRouter } from "next/navigation";
+import CategoryDropdown from "./CategoryDropdown"; // Import the new component
 
 const TransactionForm = () => {
   const router = useRouter();
@@ -33,37 +34,16 @@ const TransactionForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [categories, setCategories] = useState<{ id: number; name: string }[]>(
-    []
-  );
-
-  // Fetch categories from the database
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch("/api/categories"); // Adjust the API endpoint as needed
-        if (!response.ok) {
-          throw new Error("Failed to fetch categories.");
-        }
-        const data = await response.json();
-        console.log(data);
-        setCategories(data); // Assuming API returns { categories: [] }
-      } catch (err) {
-        console.error(err);
-        setError("Unable to load categories. Please try again later.");
-      }
-    };
-
-    fetchCategories();
-  }, []);
 
   const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleCategoryChange = (categoryId: number) => {
+    setFormData((prev) => ({ ...prev, category: categoryId }));
   };
 
   const handleTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -98,8 +78,8 @@ const TransactionForm = () => {
         return;
       }
 
-      // Get the user ID based on the token (you may need to decode or fetch the user details)
-      const userId = token ? getUserIdFromToken(token) : null; // Implement getUserIdFromToken function
+      // Get the user ID based on the token
+      const userId = token ? getUserIdFromToken(token) : null;
       console.log("userId", userId);
 
       if (!userId) {
@@ -108,20 +88,22 @@ const TransactionForm = () => {
         return;
       }
 
+      // Format the date as ISO-8601 DateTime
+      const formattedDate = `${formData.date}T00:00:00.000Z`;
+
       const response = await fetch("/api/transactions", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json", // Inform the server you're sending JSON
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          // Convert the object to JSON string
           amount: parseFloat(formData.amount),
           category: {
             connect: {
-              id: formData.category, // Backend expects this nested format
+              id: formData.category,
             },
           },
-          date: formData.date,
+          date: formattedDate,
           description: formData.description,
           type: formData.type.toUpperCase(),
           userId: userId,
@@ -179,21 +161,10 @@ const TransactionForm = () => {
         >
           Category
         </label>
-        <select
-          id="category"
+        <CategoryDropdown
           value={formData.category}
-          onChange={handleInputChange}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-        >
-          <option value="" disabled>
-            Select a category
-          </option>
-          {categories?.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
-        </select>
+          onChange={handleCategoryChange}
+        />
       </div>
       <div>
         <label

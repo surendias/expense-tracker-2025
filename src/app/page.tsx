@@ -13,6 +13,7 @@ import {
   Legend,
 } from "chart.js";
 import TransactionForm from "@/components/TransactionForm";
+import TransactionsList from "@/components/TransactionsList"; // Import the new component
 
 ChartJS.register(
   CategoryScale,
@@ -144,99 +145,7 @@ export default function Home() {
           </div>
         )}
 
-        {activeTab === "list" && (
-          <div>
-            <h1 className="text-2xl font-bold mb-6 text-gray-800">
-              Transactions List
-            </h1>
-            <form className="mb-4 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label
-                    htmlFor="filterCategory"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Category
-                  </label>
-                  <input
-                    type="text"
-                    id="filterCategory"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    placeholder="Filter by category"
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="filterType"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Type
-                  </label>
-                  <select
-                    id="filterType"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  >
-                    <option>All</option>
-                    <option>Income</option>
-                    <option>Expense</option>
-                  </select>
-                </div>
-              </div>
-              <button
-                type="submit"
-                className="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-md shadow-sm hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              >
-                Apply Filters
-              </button>
-            </form>
-
-            <div className="space-y-4">
-              {transactions.map((transaction) => (
-                <div
-                  key={transaction.id}
-                  className="p-4 border rounded-md shadow-sm bg-gray-50"
-                >
-                  <div className="flex justify-between">
-                    <h2 className="text-lg font-semibold text-gray-700">
-                      {transaction.category}
-                    </h2>
-                    <span
-                      className={`text-sm ${
-                        transaction.type === "Income"
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }`}
-                    >
-                      {transaction.type}
-                    </span>
-                  </div>
-                  <p className="text-gray-600">{transaction.description}</p>
-                  <div className="text-sm text-gray-500">
-                    {transaction.date} - {transaction.amount}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-6 flex justify-between items-center">
-              <button
-                className="px-4 py-2 bg-gray-200 rounded-md text-sm font-medium hover:bg-gray-300"
-                disabled={true} // Replace with logic for pagination
-              >
-                Previous
-              </button>
-              <span className="text-sm text-gray-500">
-                Page 1 of {totalPages}
-              </span>
-              <button
-                className="px-4 py-2 bg-gray-200 rounded-md text-sm font-medium hover:bg-gray-300"
-                disabled={false} // Replace with logic for pagination
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        )}
+        {activeTab === "list" && <TransactionsList />}
 
         {activeTab === "summary" && (
           <div>
