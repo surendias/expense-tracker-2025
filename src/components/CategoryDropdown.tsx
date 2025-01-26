@@ -1,9 +1,5 @@
-import React, { useEffect, useState } from "react";
-
-interface Category {
-  id: number;
-  name: string;
-}
+import React from "react";
+import { useCategories } from "@/context/CategoryContext"; // Adjust the import path
 
 interface CategoryDropdownProps {
   value: number | string; // Accepts both number (for form) and string (for filter)
@@ -14,33 +10,7 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({
   value,
   onChange,
 }) => {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  // Fetch categories from the API
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch("/api/categories");
-        if (!response.ok) {
-          throw new Error("Failed to fetch categories.");
-        }
-        const data = await response.json();
-        setCategories(data);
-      } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : "An error occurred while fetching categories."
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCategories();
-  }, []);
+  const { categories, loading, error } = useCategories(); // Use the context
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedValue = e.target.value;

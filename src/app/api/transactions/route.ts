@@ -35,9 +35,7 @@ export async function GET(req: Request) {
     // Fetch transactions with filtering and pagination
     const transactions = await prisma.transaction.findMany({
       where: {
-        category: {
-          name: category ? { contains: category } : undefined,
-        },
+        categoryId: category ? parseInt(category, 10) : undefined,
         type: validType, // Use the validated type
       },
       include: { user: true, category: true },
