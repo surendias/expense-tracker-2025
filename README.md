@@ -1,8 +1,3 @@
-Here’s a comprehensive `README.md` file for your repository, explaining its purpose, functionality, how to self-host it, and the tech stack used. You can copy and paste this into your repository.
-
----
-
-````markdown
 # Expense Tracker 2025
 
 ![Expense Tracker Screenshot](./screenshots/screenshot_1.png)
@@ -61,11 +56,11 @@ Follow these steps to set up and run the Expense Tracker 2025 project locally.
 ### Installation
 
 1. **Clone the repository**:
+
    ```bash
    git clone https://github.com/surendias/expense-tracker-2025.git
    cd expense-tracker-2025
    ```
-````
 
 2. **Install dependencies**:
 
@@ -193,8 +188,3 @@ This project is licensed under the MIT License. See the [LICENSE](./LICENSE) fil
 For questions or feedback, feel free to reach out:
 
 - **Suren Dias**: [GitHub](https://github.com/surendias) | [Email](mailto:suren@surendias.com)
-
-```
-
-
-```
